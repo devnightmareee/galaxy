@@ -1,0 +1,768 @@
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>کهکشان راه شیری | نسخه نهایی پایدار</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; user-select: none; }
+        body { width: 100vw; height: 100vh; overflow: hidden; font-family: 'Segoe UI', 'Vazir', 'Tahoma', monospace; background: #000; color: #fff; position: fixed; transition: background-color 0.3s ease; }
+        body.light-mode { background: #e8e8f0; }
+        body.light-mode .sidebar { background: rgba(240,240,255,0.96); border-left-color: #ff8844; color: #222; }
+        body.light-mode .sidebar .title, body.light-mode .sidebar h3, body.light-mode .sidebar .tab-button { color: #222; }
+        body.light-mode .tab-button { background: rgba(200,200,220,0.8); color: #333; border-color: #ff8844; }
+        body.light-mode .tab-button.active { background: #ff8844; color: #fff; }
+        body.light-mode .item-box { background: rgba(255,136,68,0.15); border-right-color: #ff8844; }
+        body.light-mode .item-box .title { color: #b85c00; }
+        body.light-mode .item-box .description { color: #444; }
+        body.light-mode .controls { background: rgba(240,240,255,0.94); border-color: #ff8844; }
+        body.light-mode .controls p { color: #b85c00; }
+        body.light-mode .info-text { color: #666; }
+        body.light-mode .search-box input { background: #eee; color: #333; }
+        body.light-mode .stats-panel, body.light-mode .cosmic-panel { background: rgba(200,200,220,0.8); color: #333; border-color: #ff8844; }
+        body.light-mode .bottom-info .coord-panel, body.light-mode .bottom-info .fps-counter { background: rgba(200,200,220,0.8); color: #333; }
+        body.light-mode .chart-container { background: rgba(200,200,220,0.8); border-color: #ff8844; color: #333; }
+        
+        #canvas-container { width: 100%; height: 100%; display: block; }
+        
+        .header { position: absolute; top: 0; left: 0; right: 0; padding: 20px 24px; background: linear-gradient(180deg, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0) 100%); z-index: 50; pointer-events: none; text-align: center; transition: background 0.3s; }
+        body.light-mode .header { background: linear-gradient(180deg, rgba(240,240,255,0.9) 0%, rgba(240,240,255,0) 100%); }
+        .header h1 { font-size: clamp(20px, 6vw, 48px); text-shadow: 0 0 20px #ffaa44; color: #ffcc44; }
+        body.light-mode .header h1 { text-shadow: 0 0 10px #ff8844; color: #b85c00; }
+        .header p { font-size: clamp(10px, 2.5vw, 15px); color: #ddd; }
+        body.light-mode .header p { color: #555; }
+        
+        .controls { position: absolute; bottom: 20px; left: 20px; background: rgba(10,10,20,0.94); border: 2px solid #ffaa44; border-radius: 20px; padding: 12px 15px; z-index: 60; width: 440px; backdrop-filter: blur(12px); transition: all 0.3s; }
+        .zoom-buttons { display: flex; gap: 10px; margin: 8px 0; align-items: center; }
+        .zoom-buttons button { flex: 1; padding: 6px 0; background: #ffaa44; border: none; border-radius: 40px; cursor: pointer; font-weight: bold; font-size: 18px; }
+        .zoom-display { text-align: center; font-size: 13px; font-weight: bold; color: #ffcc66; background: #000000aa; padding: 4px 10px; border-radius: 40px; min-width: 65px; }
+        .action-buttons { display: flex; gap: 8px; margin: 8px 0; flex-wrap: wrap; }
+        .action-buttons button { flex: 1; padding: 6px; border-radius: 40px; border: none; font-weight: bold; cursor: pointer; font-size: 10px; background: #334466; color: white; transition: 0.2s; }
+        .action-buttons button:hover { transform: scale(1.02); filter: brightness(1.1); }
+        .extra-row { display: flex; gap: 8px; margin: 8px 0; flex-wrap: wrap; align-items: center; }
+        .extra-row button { padding: 6px 12px; border-radius: 40px; border: none; font-weight: bold; cursor: pointer; font-size: 10px; background: #334466; color: white; }
+        .extra-row .speed-slider { display: flex; align-items: center; gap: 6px; background: #334466; padding: 3px 10px; border-radius: 30px; }
+        .extra-row .speed-slider label { font-size: 10px; color: #ffcc66; }
+        .extra-row .speed-slider input { width: 80px; cursor: pointer; }
+        .stats-panel { background: rgba(0,0,0,0.6); border-radius: 12px; padding: 8px 12px; margin: 6px 0; display: flex; justify-content: space-between; font-size: 10px; border: 1px solid #ffaa4433; flex-wrap: wrap; gap: 8px; }
+        .stats-panel div { flex: 1; text-align: center; }
+        .cosmic-panel { background: rgba(0,0,0,0.6); border-radius: 12px; padding: 8px 12px; margin: 6px 0; display: flex; justify-content: space-between; font-size: 10px; border: 1px solid #ffaa4433; flex-wrap: wrap; gap: 8px; }
+        .cosmic-panel div { flex: 1; text-align: center; }
+        .cosmic-panel span { color: #ffaa66; font-weight: bold; }
+        .search-box { margin-top: 8px; display: flex; gap: 6px; }
+        .search-box input { flex: 1; padding: 6px; border-radius: 40px; border: none; background: #222; color: #ffcc66; text-align: right; outline: none; font-size: 11px; }
+        .search-box button { background: #ffaa44; border: none; border-radius: 40px; padding: 6px 12px; cursor: pointer; font-weight: bold; }
+        .info-text { font-size: 9px; color: #aaa; text-align: center; margin-top: 6px; }
+        .turbo-btn.active { background: #ff4400; box-shadow: 0 0 12px red; animation: pulse 0.8s infinite; }
+        .reverse-btn.active { background: #44aaff; box-shadow: 0 0 12px #44aaff; }
+        @keyframes pulse { 0% { opacity: 0.7; } 100% { opacity: 1; } }
+        
+        .sidebar { position: absolute; right: 0; top: 0; width: 100%; max-width: 570px; height: 100vh; background: linear-gradient(270deg, rgba(0,0,0,0.96) 0%, rgba(0,0,0,0.88) 100%); overflow-y: auto; padding: 20px 18px; z-index: 45; border-left: 2px solid #ffaa44; direction: rtl; transition: all 0.3s; }
+        .sidebar::-webkit-scrollbar { width: 5px; }
+        .sidebar::-webkit-scrollbar-thumb { background: #ffaa44; border-radius: 5px; }
+        .tabs { display: flex; gap: 3px; flex-wrap: wrap; margin-bottom: 20px; justify-content: center; }
+        .tab-button { flex: 1; min-width: 60px; padding: 5px 1px; background: rgba(0,0,0,0.6); color: #ffdd99; border: 2px solid #ffaa44; border-radius: 40px; cursor: pointer; font-weight: bold; font-size: 8px; transition: 0.2s; }
+        .tab-button.active { background: #ffaa44; color: #000; }
+        .tab-content { display: none; animation: fadeIn 0.2s; }
+        .tab-content.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        .tab-content h3 { margin-bottom: 15px; color: #ffcc66; border-right: 4px solid #ffaa44; padding-right: 12px; font-size: 18px; }
+        .items-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); gap: 8px; }
+        .item-box { background: rgba(255,170,68,0.1); border-radius: 12px; padding: 8px; border-right: 3px solid #ffaa44; transition: 0.2s; cursor: pointer; }
+        .item-box:hover { background: rgba(255,170,68,0.3); transform: translateX(-4px); }
+        .item-box .title { font-weight: bold; color: #ffdd99; margin-bottom: 4px; font-size: 12px; }
+        .item-box .description { font-size: 9px; color: #ccc; }
+        .item-box .extra-info { font-size: 8px; color: #88aaff; margin-top: 4px; border-top: 1px dashed #ffaa4433; padding-top: 3px; }
+        .info-box { margin-top: 20px; padding: 12px; background: rgba(0,0,0,0.6); border-radius: 16px; border: 1px solid #ffaa55; }
+        
+        .chart-container {
+            position: absolute;
+            top: 100px;
+            left: 20px;
+            background: rgba(0,0,0,0.7);
+            backdrop-filter: blur(8px);
+            border-radius: 16px;
+            padding: 10px;
+            border: 1px solid #ffaa44;
+            z-index: 55;
+            width: 210px;
+            font-size: 10px;
+            direction: ltr;
+            pointer-events: none;
+        }
+        .chart-title { text-align: center; color: #ffcc66; margin-bottom: 8px; font-size: 11px; }
+        .chart-bars { display: flex; flex-direction: column; gap: 5px; }
+        .bar-item { display: flex; align-items: center; gap: 8px; }
+        .bar-label { width: 65px; text-align: right; color: #ddd; }
+        .bar-fill { height: 12px; background: #ffaa44; border-radius: 6px; transition: width 0.3s; }
+        .bar-value { width: 30px; text-align: left; color: #ffaa66; }
+        
+        .bottom-info { position: absolute; bottom: 20px; right: 20px; display: flex; gap: 12px; z-index: 55; direction: ltr; }
+        .bottom-info > div { background: rgba(0,0,0,0.65); backdrop-filter: blur(8px); border-radius: 20px; padding: 6px 14px; font-family: monospace; font-size: 11px; border: 1px solid #ffaa4433; }
+        .coord-panel { color: #88ffaa; }
+        .fps-counter { color: #ffaa66; }
+        
+        .loading { position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%); background: #000000cc; padding: 20px 30px; border-radius: 50px; z-index: 200; border: 1px solid #ffaa44; text-align: center; }
+        .loading.hidden { display: none; }
+        .spinner { width: 40px; height: 40px; border: 4px solid #ffaa44; border-top-color: transparent; border-radius: 50%; animation: spin 0.8s linear infinite; margin: 0 auto 10px; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        @media (max-width: 800px) { .sidebar { max-height: 50vh; top: auto; bottom: 0; border-left: none; border-top: 2px solid #ffaa44; } .controls { bottom: calc(50vh + 10px); width: calc(100% - 40px); left: 20px; } .bottom-info { bottom: calc(50vh + 10px); right: 20px; } .chart-container { top: auto; bottom: calc(50vh + 80px); left: 20px; } }
+        
+        .zoom-notify { position: fixed; top: 20%; left: 50%; transform: translate(-50%, -50%); background: #ffaa44cc; color: #000; padding: 8px 20px; border-radius: 40px; font-weight: bold; z-index: 100; pointer-events: none; animation: fadeOut 2s forwards; }
+        @keyframes fadeOut { 0% { opacity: 1; } 70% { opacity: 1; } 100% { opacity: 0; visibility: hidden; } }
+        
+        .object-modal {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 90%;
+            max-width: 900px;
+            background: rgba(0,0,0,0.95);
+            backdrop-filter: blur(20px);
+            border: 2px solid #ffaa44;
+            border-radius: 30px;
+            padding: 20px;
+            z-index: 200;
+            display: none;
+            box-shadow: 0 0 80px rgba(0,0,0,0.9);
+            direction: rtl;
+        }
+        .object-modal.show { display: block; animation: modalFade 0.3s ease; }
+        @keyframes modalFade { from { opacity: 0; transform: translate(-50%, -48%); } to { opacity: 1; transform: translate(-50%, -50%); } }
+        .modal-container { display: flex; flex-wrap: wrap; gap: 20px; }
+        .modal-3d { flex: 1.2; min-width: 250px; height: 300px; background: #00000044; border-radius: 20px; overflow: hidden; }
+        .modal-info { flex: 1; min-width: 240px; padding: 10px; overflow-y: auto; max-height: 300px; }
+        .modal-info h2 { color: #ffcc66; font-size: 22px; margin-bottom: 15px; border-bottom: 2px solid #ffaa44; display: inline-block; }
+        .modal-info .info-row { display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1px solid #ffaa4433; font-size: 13px; }
+        .modal-info .info-label { color: #ffaa66; font-weight: bold; }
+        .modal-info .info-value { color: #ddd; }
+        .close-modal { position: absolute; top: 15px; left: 20px; background: #ffaa44; border: none; border-radius: 30px; padding: 6px 18px; cursor: pointer; font-weight: bold; z-index: 210; }
+        .close-modal:hover { background: #ffcc66; }
+        .solar-link-btn { background: #44aa88 !important; }
+        
+        .sun-marker { position: absolute; width: 12px; height: 12px; background: radial-gradient(circle, #ffaa44, #ff6600); border-radius: 50%; box-shadow: 0 0 15px #ffaa44; z-index: 70; pointer-events: none; transform: translate(-50%, -50%); animation: pulse-marker 2s infinite; display: none; }
+        @keyframes pulse-marker { 0% { opacity: 0.6; transform: translate(-50%, -50%) scale(1); } 100% { opacity: 1; transform: translate(-50%, -50%) scale(1.3); } }
+        
+        .screenshot-notify { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); background: #ffaa44cc; color: #000; padding: 8px 20px; border-radius: 40px; font-weight: bold; z-index: 300; animation: fadeOut 2s forwards; pointer-events: none; }
+        
+        .label-toggle { background: #44aa44 !important; }
+        .label-active { background: #44aa44 !important; }
+    </style>
+</head>
+<body>
+    <div id="canvas-container"></div>
+    <div class="loading" id="loading"><div class="spinner"></div><div>🌌 بارگذاری کهکشان ...</div></div>
+    
+    <div class="header"><h1>✨ کهکشان راه شیری ✨</h1><p>۳۰ سیاره | ۳۰ ستاره | ۸ سحابی | ۵ سیاه‌چاله | ۳ سفیدچاله | ۴ کرم‌چاله | ۸ سیارک</p></div>
+    
+    <div class="controls">
+        <div class="zoom-buttons"><button onclick="zoomOut()">−</button><div class="zoom-display" id="zoomDisplay">۱۰۰%</div><button onclick="zoomIn()">+</button></div>
+        <div class="action-buttons">
+            <button id="turboBtn" onclick="toggleTurbo()">⚡ توربو</button>
+            <button id="reverseBtn" onclick="toggleReverse()">⏪ عقب‌گرد</button>
+            <button onclick="resetView()">🔄 بازنشانی</button>
+            <button id="fullscreenBtn" onclick="toggleFullscreen()">📺 تمام صفحه</button>
+            <button id="screenshotBtn" onclick="takeScreenshot()">📸 عکس</button>
+            <button onclick="window.location.href='solar-system.html'" class="solar-link-btn">🌞 منظومه شمسی</button>
+        </div>
+        <div class="extra-row">
+            <button id="themeBtn" onclick="toggleTheme()">🌙 تم دارک</button>
+            <button id="audioBtn" onclick="toggleAudio()">🎵 صدا: خاموش</button>
+            <button id="randomBtn" onclick="showRandomObject()">🎲 تصادفی</button>
+            <button id="labelToggleBtn" onclick="toggleLabels()" class="label-toggle">🏷️ برچسب‌ها: خاموش</button>
+            <div class="speed-slider"><label>⚡ سرعت چرخش</label><input type="range" id="speedSlider" min="-2" max="2" step="0.01" value="1"></div>
+        </div>
+        <div class="stats-panel">
+            <div>⭐ کل اجرام: <span id="totalObjects">88</span></div>
+            <div>🪐 سیارات: 30 | ⭐ ستارگان: 30</div>
+            <div>🎵 صدا: <span id="audioStatusText">خاموش</span></div>
+            <div>📡 نزدیک‌ترین: <span id="nearestObject">--</span></div>
+        </div>
+        <div class="cosmic-panel" id="cosmicPanel">
+            <div>🕐 زمان کیهانی: <span id="cosmicTime">00:00:00</span></div>
+            <div>📡 حالت مشاهده: <span id="viewMode">عادی</span></div>
+            <div>🎯 نزدیک‌ترین جرم: <span id="closestObject">--</span></div>
+            <div>📍 دوربین: <span id="camCoord">0,25,220</span></div>
+        </div>
+        <div class="search-box"><input type="text" id="searchInput" placeholder="جستجو در ۸۸ جرم فضایی..." onkeyup="searchItem()"><button onclick="searchItem()">🔍</button></div>
+        <p class="info-text">💡 کلیک روی هر کارت → نمای سه‌بعدی + اطلاعات کامل | دکمه عقب‌گرد → چرخش معکوس</p>
+    </div>
+    
+    <div class="chart-container" id="chartContainer">
+        <div class="chart-title">📊 آمار کهکشان</div>
+        <div class="chart-bars" id="chartBars"></div>
+    </div>
+    
+    <div class="bottom-info">
+        <div class="coord-panel" id="coordPanel">🎯 موقعیت ماوس: ۰ , ۰</div>
+        <div class="fps-counter" id="fpsCounter">FPS: --</div>
+    </div>
+    <div id="sunMarker" class="sun-marker"></div>
+    
+    <div class="sidebar">
+        <div class="tabs">
+            <button class="tab-button active" onclick="switchTab('galaxy')">🌌 کهکشان</button>
+            <button class="tab-button" onclick="switchTab('planets')">🪐 سیارات (۳۰)</button>
+            <button class="tab-button" onclick="switchTab('stars')">⭐ ستارگان (۳۰)</button>
+            <button class="tab-button" onclick="switchTab('nebula')">🌫 سحابی (۸)</button>
+            <button class="tab-button" onclick="switchTab('blackholes')">⚫ سیاه‌چاله (۵)</button>
+            <button class="tab-button" onclick="switchTab('whiteholes')">⬜ سفیدچاله (۳)</button>
+            <button class="tab-button" onclick="switchTab('wormholes')">🌀 کرم‌چاله (۴)</button>
+            <button class="tab-button" onclick="switchTab('asteroids')">💎 سیارک (۸)</button>
+        </div>
+        
+        <div class="tab-content active" id="tab-galaxy"><h3>راه شیری</h3><p style="font-size:12px;">کهکشان مارپیچی میله‌ای. نشانگر نارنجی = موقعیت خورشید در بازوی شکارچی.</p><div class="info-box"><p>📊 اطلاعات</p><ul><li>قطر: ۱۰۵٬۷۰۰ سال نوری</li><li>سن: ۱۳.۶ میلیارد سال</li><li>سیاهچاله مرکزی: Sagittarius A*</li><li>تعداد ستارگان کهکشان: ~۲۰۰ میلیارد</li></ul></div></div>
+        <div class="tab-content" id="tab-planets"><h3>🪐 ۳۰ سیاره فراخورشیدی</h3><div class="items-grid" id="planets-list"></div></div>
+        <div class="tab-content" id="tab-stars"><h3>⭐ ۳۰ ستاره برجسته</h3><div class="items-grid" id="stars-list"></div></div>
+        <div class="tab-content" id="tab-nebula"><h3>🌫 ۸ سحابی معروف</h3><div class="items-grid" id="nebula-list"></div></div>
+        <div class="tab-content" id="tab-blackholes"><h3>⚫ ۵ سیاه‌چاله معروف</h3><div class="items-grid" id="blackholes-list"></div></div>
+        <div class="tab-content" id="tab-whiteholes"><h3>⬜ ۳ سفیدچاله (نظری)</h3><div class="items-grid" id="whiteholes-list"></div></div>
+        <div class="tab-content" id="tab-wormholes"><h3>🌀 ۴ کرم‌چاله نظری</h3><div class="items-grid" id="wormholes-list"></div></div>
+        <div class="tab-content" id="tab-asteroids"><h3>💎 ۸ سیارک معروف</h3><div class="items-grid" id="asteroids-list"></div></div>
+    </div>
+    
+    <div id="objectModal" class="object-modal"><button class="close-modal" onclick="closeModal()">✖ بستن</button><div class="modal-container"><div class="modal-3d" id="modal3dContainer"></div><div class="modal-info" id="modalInfo"></div></div></div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script>
+        // ======================= دیتابیس کامل ۳۰ سیاره =======================
+        const planetNames = ["کپلر-۲۲بی", "تراپیست-۱ئی", "پروکسیما بی", "گلیز ۶۶۷ سی‌سی", "۵۵ سرطان ای", "اچ‌دی ۱۸۹۷۳۳بی", "تویی ۷۰۰ دی", "ال‌اچ‌اس ۱۱۴۰ بی", "کی۲-۱۸بی", "کپلر-۱۶بی", "واسپ-۱۲بی", "ماسکارا-۱بی", "پی‌اس‌آر ۱۲۵۷+۱۲", "فومال‌هات بی", "تی‌آرای‌اس-۴", "اپسیلون جبار بی", "اوجی‌ال‌ای-۲۰۰۵", "پی منسه سی", "کوروت-۷بی", "کپلر-۴۵۲بی", "جی‌جی ۱۲۱۴ بی", "اچ‌دی ۲۰۹۴۵۸بی", "کپلر-۱۸۶اف", "کپلر-۶۲ئی", "کپلر-۴۴۲بی", "کپلر-۲۸۳سی", "کپلر-۴۳۸دی", "کپلر-۲۹۶بی", "کپلر-۳۹سی", "کپلر-۴۱۱"];
+        const planetDescs = ["منطقه قابل سکونت", "اقیانوسی احتمالی", "نزدیک‌ترین فراخورشیدی", "ابر زمین", "جهنم الماسی", "باران شیشه", "منطقه زندگی", "ابرزمین سنگی", "بخار آب در جو", "سیاره با دو خورشید", "در حال بلعیده شدن", "غول فراداغ", "سیاره پالسانی", "غبار آلود", "کم چگال", "جوان", "یخی سرد", "گرم", "جهنم سنگی", "ابر زمین بزرگ", "سیاره آبی", "سیاره تبخیر شونده", "ابرزمین", "ابرزمین", "غول گازی", "ابرزمین", "نپتونی", "غول گازی", "نپتونی", "ابرزمین"];
+        const planetColors = [0x66cc88, 0x44aaff, 0xaa8866, 0x88aa66, 0xffaa66, 0x4488cc, 0x66aa88, 0x88bb66, 0x66ccaa, 0xaa8866, 0xff8844, 0xff6644, 0xccaa88, 0x88aadd, 0xaadd88, 0xdd8844, 0x88aacc, 0xccaa66, 0xff8866, 0x66aa88, 0x44aacc, 0xaa8866, 0x88ccaa, 0x66bb99, 0xccaa77, 0x99bb66, 0x77aacc, 0xbb9966, 0x88bbaa, 0x66aacc];
+        const exoplanetsData = [];
+        for(let i=0; i<30; i++) {
+            const angle = (i / 30) * Math.PI * 2 + Math.random() * 0.6;
+            const radius = 40 + Math.pow(Math.random(), 1.2) * 170;
+            const yOff = (Math.random() - 0.5) * 28;
+            exoplanetsData.push({ type: "planet", name: planetNames[i], desc: planetDescs[i], color: planetColors[i], size: 0.45, hasRing: (i % 7 === 3),
+                diameter: `${8000 + i * 2000}km`, temp: `${-100 + (i * 8)}°C`, mass: `${(i % 20) / 10 + 0.1} × زمین`,
+                distanceStar: `${5 + (i % 20)} میلیون کیلومتر`, yearLength: `${200 + (i % 300)} روز`,
+                pos3d: { x: Math.cos(angle) * radius, y: yOff, z: Math.sin(angle) * radius } });
+        }
+        
+        // ۳۰ ستاره
+        const starsData = [];
+        const starNames = ["خورشید", "شباهنگ", "کانوپوس", "آلفا قنطورس", "ریگل", "ابط الجوزا", "وگا", "ستاره قطبی", "الدبران", "اسپیکا", "آنتارس", "پولاکس", "کاستور", "پروسایون", "دنب", "نظمی", "منتکه", "سهیل", "میزر", "الکور", "ستاره برنارد", "وولف ۳۵۹", "سیگما قنطورس", "اتا شبان", "دلتا قیفاووس", "اسحیل", "نائوس", "بتا شکارچی", "اپسیلون اریدانی", "تاو قیفاووس"];
+        for(let i=0; i<30; i++) {
+            starsData.push({ type: "star", name: starNames[i], desc: "ستاره درخشان در کهکشان", temp: `${4000 + i*300}°C`, diameter: `${2 + i/5} میلیون کیلومتر`, mass: `${1 + i/10} × خورشید`, luminosity: `${10 + i*2} × خورشید` });
+        }
+        
+        const nebulaData = [
+            { type: "nebula", name: "سحابی جبار", desc: "زادگاه ستارگان", typeDetail: "انتشاری", distance: "۱٬۳۴۴ سال نوری", size: "۲۴ سال نوری" },
+            { type: "nebula", name: "سحابی عقاب", desc: "ستون‌های آفرینش", typeDetail: "انتشاری", distance: "۷٬۰۰۰ سال نوری", size: "۷۰ × ۵۵ سال نوری" },
+            { type: "nebula", name: "سحابی خرچنگ", desc: "بازمانده ابرنواختر", typeDetail: "بازمانده", distance: "۶٬۵۰۰ سال نوری", size: "۱۱ سال نوری" },
+            { type: "nebula", name: "سحابی سر اسب", desc: "تاریک و معروف", typeDetail: "تاریک", distance: "۱٬۵۰۰ سال نوری", size: "۳٫۵ سال نوری" },
+            { type: "nebula", name: "سحابی حلقوی", desc: "سحابی سیاره‌نما", typeDetail: "سیاره‌نما", distance: "۲٬۵۰۰ سال نوری", size: "۱٫۳ سال نوری" },
+            { type: "nebula", name: "سحابی کالیفرنیا", desc: "شکل شبیه کالیفرنیا", typeDetail: "انتشاری", distance: "۱٬۰۰۰ سال نوری", size: "۱۰۰ سال نوری" },
+            { type: "nebula", name: "سحابی کارینا", desc: "یکی از بزرگترین", typeDetail: "انتشاری", distance: "۸٬۵۰۰ سال نوری", size: "۴۶۰ سال نوری" },
+            { type: "nebula", name: "سحابی کونوس", desc: "مخروطی از گاز", typeDetail: "انتشاری", distance: "۲٬۷۰۰ سال نوری", size: "۷ سال نوری" }
+        ];
+        const blackholesData = [
+            { type: "blackhole", name: "Sagittarius A*", desc: "سیاه‌چاله مرکزی کهکشان", mass: "۴ میلیون جرم خورشیدی", radius: "~۲۲ میلیون کیلومتر" },
+            { type: "blackhole", name: "M87*", desc: "اولین سیاه‌چاله تصویربرداری شده", mass: "۶٫۵ میلیارد جرم خورشیدی", radius: "~۳۸ میلیارد کیلومتر" },
+            { type: "blackhole", name: "TON 618", desc: "یکی از بزرگترین سیاه‌چاله‌ها", mass: "۶۶ میلیارد جرم خورشیدی", radius: "~۳۹۰ میلیارد کیلومتر" },
+            { type: "blackhole", name: "Cygnus X-1", desc: "اولین کاندیدای سیاه‌چاله", mass: "۲۱ جرم خورشیدی", radius: "~۶۰ کیلومتر" },
+            { type: "blackhole", name: "GS 2000+25", desc: "سیاه‌چاله ستاره‌ای", mass: "۷٫۵ جرم خورشیدی", radius: "~۲۲ کیلومتر" }
+        ];
+        const whiteholesData = [
+            { type: "whitehole", name: "WH-1 (نظری)", desc: "نقطه مقابل سیاه‌چاله", theory: "ماده و انرژی از آن خارج می‌شود" },
+            { type: "whitehole", name: "GRB 060614 (نامزد)", desc: "انفجار بدون ابرنواختر", theory: "احتمالاً سفیدچاله" },
+            { type: "whitehole", name: "Small Bang (نظری)", desc: "مهبانگ کوچک", theory: "نقطه آغازین جهان" }
+        ];
+        const wormholesData = [
+            { type: "wormhole", name: "Einstein-Rosen Bridge", desc: "پل اینشتین-روزن", theory: "اتصال دو نقطه فضا-زمان" },
+            { type: "wormhole", name: "Morris-Thorne", desc: "کرم‌چاله عبورپذیر", theory: "با ماده عجیب پایدار می‌شود" },
+            { type: "wormhole", name: "Lorentzian Wormhole", desc: "کرم‌چاله لورنتزی", theory: "قابل عبور برای انسان" },
+            { type: "wormhole", name: "Quantum Foam", desc: "کرم‌چاله کوانتومی", theory: "در مقیاس پلانک" }
+        ];
+        const asteroidsData = [
+            { type: "asteroid", name: "سرس", desc: "بزرگ‌ترین سیارک", diameter: "۹۴۰ کیلومتر", location: "کمربند اصلی" },
+            { type: "asteroid", name: "وستا", desc: "روشن‌ترین سیارک", diameter: "۵۲۵ کیلومتر", location: "کمربند اصلی" },
+            { type: "asteroid", name: "پالاس", desc: "سیارک با شیب مداری بالا", diameter: "۵۱۲ کیلومتر", location: "کمربند اصلی" },
+            { type: "asteroid", name: "هِیجیا", desc: "چهارمین سیارک بزرگ", diameter: "۴۳۴ کیلومتر", location: "کمربند اصلی" },
+            { type: "asteroid", name: "بنو", desc: "سیارک خطرناک", diameter: "۵۰۰ متر", location: "نزدیک زمین" },
+            { type: "asteroid", name: "ریوگو", desc: "سیارک کربنی", diameter: "۹۰۰ متر", location: "نزدیک زمین" },
+            { type: "asteroid", name: "ایدا", desc: "سیارک با قمر", diameter: "۳۱ کیلومتر", location: "کمربند اصلی" },
+            { type: "asteroid", name: "اروز", desc: "نزدیک به زمین", diameter: "۱۳ کیلومتر", location: "نزدیک زمین" }
+        ];
+        
+        const allObjects = [...exoplanetsData, ...starsData, ...nebulaData, ...blackholesData, ...whiteholesData, ...wormholesData, ...asteroidsData];
+        document.getElementById('totalObjects').innerText = allObjects.length;
+        
+        const objectPositions = [];
+        for(let obj of allObjects) {
+            if(obj.pos3d) objectPositions.push({ name: obj.name, type: obj.type, pos: obj.pos3d });
+        }
+        objectPositions.push({ name: "Sagittarius A*", type: "blackhole", pos: { x: 0, y: 0, z: 0 } });
+        
+        // ======================= THREE.JS =======================
+        let scene, camera, renderer, galaxyPoints, labelSprites = [];
+        let targetRotY = 0, targetRotX = 0, currentRotX = 0, currentRotY = 0;
+        let zoomLevel = 1, turbo = false, reverse = false, showLabels = false;
+        let galaxySpeed = 1;
+        let cosmicSeconds = 0;
+        let audioCtx = null, audioEnabled = false, audioGain = null, audioOsc = null;
+        let modalScene, modalCamera, modalRenderer, modalObjectMesh, modalAnimationId;
+        let lastTime = performance.now(), frameCount = 0;
+        let lastCosmicUpdate = 0;
+        
+        const canvasContainer = document.getElementById('canvas-container');
+        const loadingDiv = document.getElementById('loading');
+        const sunMarker = document.getElementById('sunMarker');
+        
+        function updateChart() {
+            const categories = [
+                { name: "سیارات", count: exoplanetsData.length, color: "#66cc88" },
+                { name: "ستارگان", count: starsData.length, color: "#ffaa66" },
+                { name: "سحابی", count: nebulaData.length, color: "#ff66aa" },
+                { name: "سیاه‌چاله", count: blackholesData.length, color: "#884444" },
+                { name: "سفیدچاله", count: whiteholesData.length, color: "#eeeeaa" },
+                { name: "کرم‌چاله", count: wormholesData.length, color: "#88aaff" },
+                { name: "سیارک", count: asteroidsData.length, color: "#aa8866" }
+            ];
+            const maxCount = Math.max(...categories.map(c => c.count), 1);
+            const container = document.getElementById('chartBars');
+            container.innerHTML = categories.map(c => `
+                <div class="bar-item">
+                    <div class="bar-label">${c.name}</div>
+                    <div class="bar-fill" style="width: ${(c.count / maxCount) * 100}%; background: ${c.color};"></div>
+                    <div class="bar-value">${c.count}</div>
+                </div>
+            `).join('');
+        }
+        
+        function updateNearestTracker() {
+            let closest = null;
+            let minDist = Infinity;
+            for(let obj of objectPositions) {
+                const dx = obj.pos.x - camera.position.x;
+                const dy = obj.pos.y - camera.position.y;
+                const dz = obj.pos.z - camera.position.z;
+                const dist = Math.sqrt(dx*dx + dy*dy + dz*dz);
+                if(dist < minDist) {
+                    minDist = dist;
+                    closest = obj;
+                }
+            }
+            if(closest && minDist < 200) {
+                const icon = closest.type === "planet" ? "🪐" : (closest.type === "star" ? "⭐" : (closest.type === "blackhole" ? "⚫" : "🌀"));
+                document.getElementById('nearestObject').innerHTML = `${icon} ${closest.name}`;
+            } else {
+                document.getElementById('nearestObject').innerHTML = "---";
+            }
+        }
+        
+        function updateCosmicInfo() {
+            let effectiveSpeed = reverse ? -galaxySpeed : galaxySpeed;
+            cosmicSeconds += 0.5 * Math.abs(effectiveSpeed);
+            if(cosmicSeconds >= 86400) cosmicSeconds -= 86400;
+            if(cosmicSeconds < 0) cosmicSeconds += 86400;
+            const hours = Math.floor(cosmicSeconds / 3600);
+            const minutes = Math.floor((cosmicSeconds % 3600) / 60);
+            const seconds = Math.floor(cosmicSeconds % 60);
+            document.getElementById('cosmicTime').innerText = `${hours.toString().padStart(2,'0')}:${minutes.toString().padStart(2,'0')}:${seconds.toString().padStart(2,'0')}`;
+            
+            const camDist = camera.position.length();
+            let mode = "عادی";
+            if(camDist < 100) mode = "🔍 نمای نزدیک";
+            else if(camDist > 350) mode = "🌌 نمای دور";
+            document.getElementById('viewMode').innerHTML = mode;
+            document.getElementById('camCoord').innerHTML = `${Math.round(camera.position.x)},${Math.round(camera.position.y)},${Math.round(camera.position.z)}`;
+            
+            let closest = null;
+            let minDist = Infinity;
+            for(let obj of objectPositions) {
+                const dx = obj.pos.x - camera.position.x;
+                const dy = obj.pos.y - camera.position.y;
+                const dz = obj.pos.z - camera.position.z;
+                const dist = Math.sqrt(dx*dx + dy*dy + dz*dz);
+                if(dist < minDist) {
+                    minDist = dist;
+                    closest = obj;
+                }
+            }
+            if(closest && minDist < 150) {
+                const icon = closest.type === "planet" ? "🪐" : (closest.type === "star" ? "⭐" : (closest.type === "blackhole" ? "⚫" : "🌀"));
+                document.getElementById('closestObject').innerHTML = `${icon} ${closest.name}`;
+            } else {
+                document.getElementById('closestObject').innerHTML = "---";
+            }
+            updateNearestTracker();
+        }
+        
+        function createLabels() {
+            labelSprites.forEach(s => scene.remove(s));
+            labelSprites = [];
+            if(!showLabels) return;
+            exoplanetsData.forEach(p => {
+                const canvas = document.createElement('canvas');
+                canvas.width = 256;
+                canvas.height = 72;
+                const ctx = canvas.getContext('2d');
+                ctx.fillStyle = 'rgba(0,0,0,0.75)';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                ctx.strokeStyle = '#ffaa44';
+                ctx.lineWidth = 1.5;
+                ctx.strokeRect(2, 2, canvas.width - 4, canvas.height - 4);
+                ctx.font = 'bold 16px "Vazir", "Segoe UI"';
+                ctx.fillStyle = '#ffdd99';
+                ctx.textAlign = 'center';
+                ctx.fillText(p.name, canvas.width/2, canvas.height/2);
+                const texture = new THREE.CanvasTexture(canvas);
+                const material = new THREE.SpriteMaterial({ map: texture, depthTest: false });
+                const sprite = new THREE.Sprite(material);
+                sprite.scale.set(1.4, 0.4, 1);
+                sprite.position.set(p.pos3d.x, p.pos3d.y + 0.7, p.pos3d.z);
+                scene.add(sprite);
+                labelSprites.push(sprite);
+            });
+        }
+        
+        function createSpiralGalaxy() {
+            const count = 45000;
+            const geom = new THREE.BufferGeometry();
+            const pos = new Float32Array(count * 3), cols = new Float32Array(count * 3);
+            for (let i = 0; i < count; i++) {
+                let r, angle, y;
+                if (Math.random() < 0.75) {
+                    r = 20 + Math.pow(Math.random(), 1.15) * 210;
+                    let arm = Math.floor(Math.random() * 4);
+                    let armAng = (arm / 4) * Math.PI * 2;
+                    let spiral = (r - 20) / 32;
+                    angle = armAng + spiral + (Math.random() - 0.5) * 0.8;
+                    y = Math.sin(r * 0.04) * (Math.random() - 0.5) * 4.5 + (Math.random() - 0.5) * 1.5;
+                } else {
+                    r = 45 + Math.random() * 220;
+                    angle = Math.random() * Math.PI * 2;
+                    y = (Math.random() - 0.5) * 55;
+                }
+                let x = Math.cos(angle) * r, z = Math.sin(angle) * r;
+                pos[i*3] = x; pos[i*3+1] = y; pos[i*3+2] = z;
+                let dist = Math.sqrt(x*x + z*z);
+                let rC = dist < 40 ? 1.0 : (dist < 110 ? 0.85 : 0.55);
+                let gC = dist < 40 ? 0.75 : (dist < 110 ? 0.65 : 0.55);
+                let bC = dist < 40 ? 0.35 : (dist < 110 ? 0.55 : 0.85);
+                cols[i*3] = rC + Math.random()*0.2;
+                cols[i*3+1] = gC + Math.random()*0.2;
+                cols[i*3+2] = bC + Math.random()*0.2;
+            }
+            geom.setAttribute('position', new THREE.BufferAttribute(pos, 3));
+            geom.setAttribute('color', new THREE.BufferAttribute(cols, 3));
+            galaxyPoints = new THREE.Points(geom, new THREE.PointsMaterial({ size: 0.44, vertexColors: true, blending: THREE.AdditiveBlending }));
+            scene.add(galaxyPoints);
+        }
+        
+        function createBackgroundStars() {
+            const count = 15000, geom = new THREE.BufferGeometry(), pos = new Float32Array(count * 3);
+            for (let i = 0; i < count; i++) { pos[i*3] = (Math.random()-0.5)*2800; pos[i*3+1] = (Math.random()-0.5)*2000; pos[i*3+2] = (Math.random()-0.5)*2400 - 600; }
+            geom.setAttribute('position', new THREE.BufferAttribute(pos, 3));
+            scene.add(new THREE.Points(geom, new THREE.PointsMaterial({ color: 0xaaccff, size: 0.22, transparent: true, opacity: 0.6, blending: THREE.AdditiveBlending })));
+        }
+        
+        function createBlackHoleEffect() {
+            const core = new THREE.Mesh(new THREE.SphereGeometry(1.5, 64, 64), new THREE.MeshStandardMaterial({ color: 0x000000, emissive: 0x330000, emissiveIntensity: 0.8 }));
+            core.position.set(0, 0, 0); scene.add(core);
+            const ring = new THREE.Mesh(new THREE.TorusGeometry(2.3, 0.1, 64, 200), new THREE.MeshStandardMaterial({ color: 0xff5500, emissive: 0xff3300, emissiveIntensity: 0.5 }));
+            ring.rotation.x = Math.PI / 2; core.add(ring);
+        }
+        
+        function createSunPositionMarker() {
+            const sunDistance = 72, sunAngle = 2.1;
+            const sunX = Math.cos(sunAngle) * sunDistance;
+            const sunZ = Math.sin(sunAngle) * sunDistance;
+            const sunY = 4;
+            const marker = new THREE.Mesh(new THREE.SphereGeometry(0.6, 32, 32), new THREE.MeshStandardMaterial({ color: 0xffaa44, emissive: 0xff4400, emissiveIntensity: 0.7 }));
+            marker.position.set(sunX, sunY, sunZ);
+            scene.add(marker);
+            const halo = new THREE.Mesh(new THREE.SphereGeometry(0.9, 16, 16), new THREE.MeshBasicMaterial({ color: 0xff8844, transparent: true, opacity: 0.3 }));
+            marker.add(halo);
+            function updateCSSMarker() {
+                const vector = new THREE.Vector3(sunX, sunY, sunZ).project(camera);
+                const x = (vector.x * 0.5 + 0.5) * window.innerWidth;
+                const y = (-vector.y * 0.5 + 0.5) * window.innerHeight;
+                if(vector.z < 1) { sunMarker.style.display = 'block'; sunMarker.style.left = x + 'px'; sunMarker.style.top = y + 'px'; }
+                else sunMarker.style.display = 'none';
+                requestAnimationFrame(updateCSSMarker);
+            }
+            updateCSSMarker();
+        }
+        
+        function createParticleBurst(position) {
+            const count = 25;
+            const geometry = new THREE.BufferGeometry();
+            const positions = new Float32Array(count * 3);
+            for(let i=0; i<count; i++) {
+                positions[i*3] = (Math.random() - 0.5) * 1.2;
+                positions[i*3+1] = (Math.random() - 0.5) * 1.2;
+                positions[i*3+2] = (Math.random() - 0.5) * 1.2;
+            }
+            geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+            const material = new THREE.PointsMaterial({ color: 0xffaa66, size: 0.08, transparent: true, blending: THREE.AdditiveBlending });
+            const particles = new THREE.Points(geometry, material);
+            particles.position.copy(position);
+            scene.add(particles);
+            let life = 0;
+            function animateParticles() {
+                life += 0.05;
+                particles.scale.setScalar(1 - life * 0.5);
+                material.opacity = 1 - life;
+                if(life >= 1) {
+                    scene.remove(particles);
+                    return;
+                }
+                requestAnimationFrame(animateParticles);
+            }
+            animateParticles();
+        }
+        
+        function initThree() {
+            scene = new THREE.Scene(); scene.background = new THREE.Color(0x010105); scene.fog = new THREE.FogExp2(0x010105, 0.00022);
+            camera = new THREE.PerspectiveCamera(75, window.innerWidth/window.innerHeight, 0.1, 6000);
+            camera.position.set(0, 25, 220);
+            renderer = new THREE.WebGLRenderer({ antialias: true, preserveDrawingBuffer: true });
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            canvasContainer.appendChild(renderer.domElement);
+            createSpiralGalaxy(); createBackgroundStars(); createBlackHoleEffect(); createSunPositionMarker(); createLabels();
+            scene.add(new THREE.AmbientLight(0x111122)); scene.add(new THREE.PointLight(0xffaa66, 1.2, 700));
+            loadingDiv.classList.add('hidden');
+            updateChart();
+            
+            let targetY = 0, targetX = 0, curY = 0, curX = 0;
+            document.addEventListener('mousemove', (e) => {
+                let nx = (e.clientX / window.innerWidth) - 0.5, ny = (e.clientY / window.innerHeight) - 0.5;
+                targetY = nx * 0.6; targetX = ny * 0.32;
+                if (turbo) { targetY *= 1.5; targetX *= 1.3; }
+                document.getElementById('coordPanel').innerHTML = `🎯 موقعیت: ${Math.round(nx*100)} , ${Math.round(ny*100)}`;
+            });
+            
+            function animate(now) {
+                requestAnimationFrame(animate);
+                curX += (targetX - curX) * 0.055; curY += (targetY - curY) * 0.055;
+                if (galaxyPoints) {
+                    galaxyPoints.rotation.x = curX * 0.45;
+                    galaxyPoints.rotation.y = curY * 0.55;
+                    let speed = reverse ? -0.00015 * Math.abs(galaxySpeed) : 0.00015 * galaxySpeed;
+                    galaxyPoints.rotation.z += speed;
+                }
+                if(showLabels) {
+                    labelSprites.forEach((sprite, idx) => {
+                        if(exoplanetsData[idx]) sprite.position.set(exoplanetsData[idx].pos3d.x, exoplanetsData[idx].pos3d.y + 0.7, exoplanetsData[idx].pos3d.z);
+                    });
+                }
+                renderer.render(scene, camera);
+                frameCount++;
+                if(now - lastTime >= 1000) { document.getElementById('fpsCounter').innerHTML = `FPS: ${frameCount}`; frameCount = 0; lastTime = now; }
+                if(now - lastCosmicUpdate >= 500) { updateCosmicInfo(); lastCosmicUpdate = now; }
+            }
+            animate();
+            window.addEventListener('resize', () => { camera.aspect = window.innerWidth/window.innerHeight; camera.updateProjectionMatrix(); renderer.setSize(window.innerWidth, window.innerHeight); });
+        }
+        
+        function showModal(obj) {
+            if (!obj) return;
+            if(obj.pos3d) createParticleBurst(new THREE.Vector3(obj.pos3d.x, obj.pos3d.y, obj.pos3d.z));
+            else createParticleBurst(new THREE.Vector3(0, 0, 0));
+            
+            const modal = document.getElementById('objectModal');
+            let icon = "";
+            if(obj.type === "planet") icon = "🪐";
+            else if(obj.type === "star") icon = "⭐";
+            else if(obj.type === "nebula") icon = "🌫";
+            else if(obj.type === "blackhole") icon = "⚫";
+            else if(obj.type === "whitehole") icon = "⬜";
+            else if(obj.type === "wormhole") icon = "🌀";
+            else icon = "💎";
+            
+            let infoHtml = `<h2>${icon} ${obj.name}</h2>`;
+            infoHtml += `<div class="info-row"><span class="info-label">📝 توضیحات:</span><span class="info-value">${obj.desc}</span></div>`;
+            if(obj.temp) infoHtml += `<div class="info-row"><span class="info-label">🌡 دما:</span><span class="info-value">${obj.temp}</span></div>`;
+            if(obj.diameter) infoHtml += `<div class="info-row"><span class="info-label">📏 قطر:</span><span class="info-value">${obj.diameter}</span></div>`;
+            if(obj.mass) infoHtml += `<div class="info-row"><span class="info-label">⚖ جرم:</span><span class="info-value">${obj.mass}</span></div>`;
+            if(obj.distance) infoHtml += `<div class="info-row"><span class="info-label">📍 فاصله:</span><span class="info-value">${obj.distance}</span></div>`;
+            if(obj.luminosity) infoHtml += `<div class="info-row"><span class="info-label">✨ درخشندگی:</span><span class="info-value">${obj.luminosity}</span></div>`;
+            if(obj.theory) infoHtml += `<div class="info-row"><span class="info-label">🧠 نظریه:</span><span class="info-value">${obj.theory}</span></div>`;
+            if(obj.typeDetail) infoHtml += `<div class="info-row"><span class="info-label">🔬 نوع:</span><span class="info-value">${obj.typeDetail}</span></div>`;
+            if(obj.size) infoHtml += `<div class="info-row"><span class="info-label">📐 اندازه:</span><span class="info-value">${obj.size}</span></div>`;
+            if(obj.location) infoHtml += `<div class="info-row"><span class="info-label">📍 موقعیت:</span><span class="info-value">${obj.location}</span></div>`;
+            document.getElementById('modalInfo').innerHTML = infoHtml;
+            modal.classList.add('show');
+            
+            const container = document.getElementById('modal3dContainer');
+            container.innerHTML = '';
+            if (modalScene) { if (modalAnimationId) cancelAnimationFrame(modalAnimationId); if (modalRenderer) modalRenderer.dispose(); }
+            modalScene = new THREE.Scene(); modalScene.background = new THREE.Color(0x050520);
+            modalCamera = new THREE.PerspectiveCamera(45, container.clientWidth/container.clientHeight, 0.1, 100);
+            modalCamera.position.set(0, 0, 4);
+            modalRenderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+            modalRenderer.setSize(container.clientWidth, container.clientHeight);
+            container.appendChild(modalRenderer.domElement);
+            
+            if(obj.type === "planet") {
+                modalObjectMesh = new THREE.Mesh(new THREE.SphereGeometry(1, 128, 128), new THREE.MeshStandardMaterial({ color: obj.color || 0x88aaff, roughness: 0.4 }));
+                modalScene.add(modalObjectMesh);
+                if(obj.hasRing) { const ring = new THREE.Mesh(new THREE.TorusGeometry(1.15, 0.05, 64, 200), new THREE.MeshStandardMaterial({ color: 0xc2b280 })); ring.rotation.x = Math.PI/2.2; modalObjectMesh.add(ring); }
+            } else if(obj.type === "star") {
+                modalObjectMesh = new THREE.Mesh(new THREE.SphereGeometry(1, 128, 128), new THREE.MeshStandardMaterial({ color: 0xffaa66, emissive: 0xff4400, emissiveIntensity: 0.8 }));
+                modalScene.add(modalObjectMesh);
+            } else if(obj.type === "blackhole") {
+                modalObjectMesh = new THREE.Mesh(new THREE.SphereGeometry(0.8, 128, 128), new THREE.MeshStandardMaterial({ color: 0x000000, emissive: 0x330000 }));
+                modalScene.add(modalObjectMesh);
+                const disk = new THREE.Mesh(new THREE.TorusGeometry(1.2, 0.08, 64, 200), new THREE.MeshStandardMaterial({ color: 0xff5500, emissive: 0xff3300 }));
+                disk.rotation.x = Math.PI/2; modalObjectMesh.add(disk);
+            } else if(obj.type === "wormhole") {
+                const group = new THREE.Group();
+                const cylinderGeo = new THREE.CylinderGeometry(0.6, 0.6, 1.2, 64, 64);
+                const material = new THREE.MeshStandardMaterial({ color: 0x88aaff, emissive: 0x4488ff, emissiveIntensity: 0.5 });
+                const cylinder = new THREE.Mesh(cylinderGeo, material);
+                cylinder.scale.set(1, 1.5, 1);
+                group.add(cylinder);
+                const ring1 = new THREE.Mesh(new THREE.TorusGeometry(0.85, 0.05, 64, 200), new THREE.MeshStandardMaterial({ color: 0x88aaff, emissive: 0x4488ff }));
+                ring1.rotation.x = Math.PI/2; ring1.position.y = 0.9;
+                group.add(ring1);
+                const ring2 = new THREE.Mesh(new THREE.TorusGeometry(0.85, 0.05, 64, 200), new THREE.MeshStandardMaterial({ color: 0x88aaff, emissive: 0x4488ff }));
+                ring2.rotation.x = Math.PI/2; ring2.position.y = -0.9;
+                group.add(ring2);
+                const innerRing = new THREE.Mesh(new THREE.TorusGeometry(0.45, 0.04, 64, 200), new THREE.MeshStandardMaterial({ color: 0xffaa88, emissive: 0xff8844 }));
+                innerRing.rotation.x = Math.PI/2;
+                group.add(innerRing);
+                modalObjectMesh = group;
+                modalScene.add(modalObjectMesh);
+            } else if(obj.type === "whitehole") {
+                const group = new THREE.Group();
+                const coneGeo = new THREE.ConeGeometry(0.9, 1.4, 64);
+                const coneMat = new THREE.MeshStandardMaterial({ color: 0xffeedd, emissive: 0xffaa88, emissiveIntensity: 0.6 });
+                const cone = new THREE.Mesh(coneGeo, coneMat);
+                cone.position.y = 0.2;
+                group.add(cone);
+                const glow = new THREE.Mesh(new THREE.SphereGeometry(0.5, 32, 32), new THREE.MeshBasicMaterial({ color: 0xffeedd, transparent: true, opacity: 0.5 }));
+                glow.position.y = -0.5;
+                group.add(glow);
+                modalObjectMesh = group;
+                modalScene.add(modalObjectMesh);
+            } else {
+                modalObjectMesh = new THREE.Mesh(new THREE.IcosahedronGeometry(1), new THREE.MeshStandardMaterial({ color: 0x88aaff }));
+                modalScene.add(modalObjectMesh);
+            }
+            
+            modalScene.add(new THREE.AmbientLight(0x333333));
+            const light = new THREE.PointLight(0xffaa66, 1); light.position.set(2,2,3); modalScene.add(light);
+            modalScene.add(new THREE.PointLight(0x88aaff, 0.5).position.set(-2,1,2));
+            
+            function animateModal() { if(modalObjectMesh) { modalObjectMesh.rotation.y += 0.01; modalObjectMesh.rotation.x += 0.003; modalRenderer.render(modalScene, modalCamera); modalAnimationId = requestAnimationFrame(animateModal); } }
+            animateModal();
+            window.addEventListener('resize', () => { if(modalRenderer && container) { let w=container.clientWidth, h=container.clientHeight; modalCamera.aspect=w/h; modalCamera.updateProjectionMatrix(); modalRenderer.setSize(w,h); } });
+        }
+        
+        function initAudio() {
+            if(audioCtx && audioCtx.state !== 'closed') return;
+            try {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                audioGain = audioCtx.createGain();
+                audioGain.gain.value = 0.1;
+                audioGain.connect(audioCtx.destination);
+                audioOsc = audioCtx.createOscillator();
+                audioOsc.type = 'sine';
+                audioOsc.frequency.value = 0.5;
+                audioOsc.connect(audioGain);
+                audioOsc.start();
+            } catch(e) { console.log("Audio not supported"); }
+        }
+        
+        function startAudio() { if(audioCtx && audioCtx.state === 'suspended') audioCtx.resume(); }
+        
+        window.takeScreenshot = () => {
+            try {
+                const canvas = renderer.domElement;
+                const dataURL = canvas.toDataURL('image/png');
+                const link = document.createElement('a');
+                const timestamp = new Date().toISOString().slice(0,19).replace(/:/g, '-');
+                link.download = `galaxy_${timestamp}.png`;
+                link.href = dataURL;
+                link.click();
+                const notify = document.createElement('div');
+                notify.className = 'screenshot-notify';
+                notify.innerText = '📸 عکس کهکشان ذخیره شد!';
+                document.body.appendChild(notify);
+                setTimeout(() => notify.remove(), 2000);
+            } catch(e) { alert('خطا در ذخیره عکس'); }
+        };
+        
+        window.toggleTheme = () => { document.body.classList.toggle('light-mode'); document.getElementById('themeBtn').innerHTML = document.body.classList.contains('light-mode') ? '🌙 تم روشن' : '🌙 تم دارک'; };
+        
+        window.toggleAudio = () => {
+            if(!audioEnabled) {
+                initAudio(); startAudio();
+                audioEnabled = true;
+                document.getElementById('audioBtn').innerHTML = '🎵 صدا: روشن';
+                document.getElementById('audioStatusText').innerHTML = 'روشن';
+            } else {
+                if(audioCtx) audioCtx.close();
+                audioEnabled = false;
+                document.getElementById('audioBtn').innerHTML = '🎵 صدا: خاموش';
+                document.getElementById('audioStatusText').innerHTML = 'خاموش';
+            }
+        };
+        
+        window.toggleReverse = () => {
+            reverse = !reverse;
+            const btn = document.getElementById('reverseBtn');
+            btn.classList.toggle('active', reverse);
+            btn.innerText = reverse ? "⏪ عقب‌گرد (فعال)" : "⏪ عقب‌گرد";
+        };
+        
+        window.toggleLabels = () => {
+            showLabels = !showLabels;
+            createLabels();
+            const btn = document.getElementById('labelToggleBtn');
+            btn.innerText = showLabels ? "🏷️ برچسب‌ها: روشن" : "🏷️ برچسب‌ها: خاموش";
+        };
+        
+        window.showRandomObject = () => { const randomIndex = Math.floor(Math.random() * allObjects.length); showModal(allObjects[randomIndex]); };
+        document.getElementById('speedSlider').addEventListener('input', (e) => { galaxySpeed = parseFloat(e.target.value); });
+        
+        window.closeModal = () => { document.getElementById('objectModal').classList.remove('show'); if(modalAnimationId) cancelAnimationFrame(modalAnimationId); if(modalRenderer) modalRenderer.dispose(); modalScene=null; modalObjectMesh=null; };
+        window.zoomIn = () => { zoomLevel = Math.max(0.45, zoomLevel*0.93); camera.position.z = 220 * zoomLevel; document.getElementById('zoomDisplay').innerText = Math.round(100/zoomLevel)+"%"; };
+        window.zoomOut = () => { zoomLevel = Math.min(2.8, zoomLevel/0.93); camera.position.z = 220 * zoomLevel; document.getElementById('zoomDisplay').innerText = Math.round(100/zoomLevel)+"%"; };
+        window.resetView = () => { zoomLevel = 1; camera.position.set(0, 25, 220); targetX=0; targetY=0; curX=0; curY=0; if(galaxyPoints) { galaxyPoints.rotation.x=0; galaxyPoints.rotation.y=0; } document.getElementById('zoomDisplay').innerText="100%"; };
+        window.toggleTurbo = () => { turbo = !turbo; const btn = document.getElementById('turboBtn'); btn.classList.toggle('active', turbo); btn.innerText = turbo ? "⚡ توربو (فعال)" : "⚡ توربو"; };
+        
+        window.toggleFullscreen = () => {
+            if(!document.fullscreenElement) {
+                document.documentElement.requestFullscreen();
+                document.getElementById('fullscreenBtn').innerHTML = '📺 خروج';
+            } else {
+                document.exitFullscreen();
+                document.getElementById('fullscreenBtn').innerHTML = '📺 تمام صفحه';
+            }
+        };
+        
+        window.searchItem = () => { let q = document.getElementById('searchInput').value.trim().toLowerCase(); let found = allObjects.find(i => i.name.toLowerCase().includes(q)); if(found) showModal(found); else alert('❌ یافت نشد'); };
+        window.switchTab = function(tab) { document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active')); document.querySelectorAll('.tab-button').forEach(b => b.classList.remove('active')); document.getElementById(`tab-${tab}`).classList.add('active'); event.target.classList.add('active'); };
+        
+        function makeClickable(container, items) {
+            items.forEach(item => {
+                const div = document.createElement('div'); div.className = 'item-box';
+                let extra = '';
+                if(item.temp) extra += `🌡 ${item.temp} | `;
+                if(item.diameter) extra += `📏 ${item.diameter} | `;
+                if(item.mass) extra += `⚖ ${item.mass}`;
+                div.innerHTML = `<div class="title">${item.name}</div><div class="description">${item.desc}</div><div class="extra-info">${extra}</div>`;
+                div.onclick = () => showModal(item);
+                container.appendChild(div);
+            });
+        }
+        
+        function populateLists() {
+            makeClickable(document.getElementById('planets-list'), exoplanetsData);
+            makeClickable(document.getElementById('stars-list'), starsData);
+            makeClickable(document.getElementById('nebula-list'), nebulaData);
+            makeClickable(document.getElementById('blackholes-list'), blackholesData);
+            makeClickable(document.getElementById('whiteholes-list'), whiteholesData);
+            makeClickable(document.getElementById('wormholes-list'), wormholesData);
+            makeClickable(document.getElementById('asteroids-list'), asteroidsData);
+        }
+        
+        window.addEventListener('load', () => { populateLists(); initThree(); });
+    </script>
+</body>
+</html>
