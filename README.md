@@ -127,7 +127,7 @@ python -m http.server 8080
 
 - [مشاهده کهکشان](galaxy.html) 🌌
 - [مشاهده منظومه شمسی](solar-system.html) ☀️
-- [پروژه گیتهاب](https://github.com/) (به زودی)
+- [پروژه گیت هاب](https://github.com/devnightmareee/galaxy)
 
 ---
 
