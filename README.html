@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>README | پروژه کهکشان</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;700;900&display=swap');
+        
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: 'Vazirmatn', 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #0a0a0f 0%, #1a1a2e 50%, #0a0a0f 100%);
+            color: #e0e0e0;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+        
+        .stars {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 0;
+        }
+        
+        .star {
+            position: absolute;
+            background: white;
+            border-radius: 50%;
+            animation: twinkle var(--duration) ease-in-out infinite;
+        }
+        
+        @keyframes twinkle {
+            0%, 100% { opacity: 0.2; transform: scale(0.8); }
+            50% { opacity: 1; transform: scale(1.2); }
+        }
+        
+        .container {
+            position: relative;
+            z-index: 1;
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 50px;
+            padding: 40px;
+            background: rgba(255, 170, 68, 0.05);
+            border-radius: 30px;
+            border: 1px solid rgba(255, 170, 68, 0.2);
+            backdrop-filter: blur(10px);
+        }
+        
+        .header h1 {
+            font-size: 3em;
+            font-weight: 900;
+            background: linear-gradient(135deg, #ffaa44, #ff6644, #ffaa44);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 15px;
+            text-shadow: 0 0 40px rgba(255, 170, 68, 0.3);
+        }
+        
+        .header .subtitle {
+            font-size: 1.2em;
+            color: #aaa;
+            font-weight: 300;
+        }
+        
+        .badges {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 25px;
+            flex-wrap: wrap;
+        }
+        
+        .badge {
+            padding: 8px 20px;
+            border-radius: 50px;
+            font-size: 0.85em;
+            font-weight: 700;
+            border: 2px solid;
+        }
+        
+        .badge.js { border-color: #f7df1e; color: #f7df1e; background: rgba(247, 223, 30, 0.1); }
+        .badge.three { border-color: #44aaff; color: #44aaff; background: rgba(68, 170, 255, 0.1); }
+        .badge.html { border-color: #ff6644; color: #ff6644; background: rgba(255, 102, 68, 0.1); }
+        
+        .section {
+            margin-bottom: 40px;
+            padding: 30px;
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 20px;
+            border: 1px solid rgba(255, 170, 68, 0.1);
+            backdrop-filter: blur(10px);
+        }
+        
+        .section h2 {
+            font-size: 1.8em;
+            color: #ffaa44;
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid rgba(255, 170, 68, 0.3);
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+        }
+        
+        .feature-card {
+            padding: 25px;
+            background: rgba(255, 170, 68, 0.05);
+            border-radius: 15px;
+            border: 1px solid rgba(255, 170, 68, 0.15);
+            transition: all 0.3s ease;
+        }
+        
+        .feature-card:hover {
+            transform: translateY(-5px);
+            background: rgba(255, 170, 68, 0.1);
+            border-color: rgba(255, 170, 68, 0.4);
+            box-shadow: 0 10px 30px rgba(255, 170, 68, 0.1);
+        }
+        
+        .feature-card .icon {
+            font-size: 2.5em;
+            margin-bottom: 15px;
+        }
+        
+        .feature-card h3 {
+            color: #ffdd99;
+            margin-bottom: 10px;
+            font-size: 1.2em;
+        }
+        
+        .feature-card p {
+            color: #aaa;
+            font-size: 0.95em;
+            line-height: 1.6;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 15px;
+        }
+        
+        .stat-item {
+            text-align: center;
+            padding: 20px;
+            background: rgba(255, 170, 68, 0.08);
+            border-radius: 15px;
+            border: 1px solid rgba(255, 170, 68, 0.15);
+        }
+        
+        .stat-item .number {
+            font-size: 2em;
+            font-weight: 900;
+            color: #ffaa44;
+            display: block;
+        }
+        
+        .stat-item .label {
+            font-size: 0.85em;
+            color: #888;
+            margin-top: 5px;
+        }
+        
+        .file-tree {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 25px;
+            border-radius: 15px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.95em;
+            line-height: 1.8;
+            direction: ltr;
+            text-align: left;
+        }
+        
+        .file-tree .folder { color: #ffaa44; font-weight: bold; }
+        .file-tree .file { color: #88aaff; }
+        .file-tree .info { color: #666; }
+        
+        .controls-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        .controls-table th, .controls-table td {
+            padding: 15px;
+            text-align: right;
+            border-bottom: 1px solid rgba(255, 170, 68, 0.1);
+        }
+        
+        .controls-table th {
+            color: #ffaa44;
+            font-weight: 700;
+        }
+        
+        .controls-table td:first-child {
+            color: #ffdd99;
+        }
+        
+        .controls-table td:last-child {
+            color: #aaa;
+        }
+        
+        .controls-table tr:hover {
+            background: rgba(255, 170, 68, 0.05);
+        }
+        
+        .btn-group {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            justify-content: center;
+            margin-top: 30px;
+        }
+        
+        .btn {
+            padding: 15px 35px;
+            border-radius: 50px;
+            font-size: 1.1em;
+            font-weight: 700;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #ffaa44, #ff6644);
+            color: #000;
+            border: none;
+        }
+        
+        .btn-primary:hover {
+            transform: scale(1.05);
+            box-shadow: 0 10px 30px rgba(255, 170, 68, 0.4);
+        }
+        
+        .btn-secondary {
+            background: transparent;
+            color: #ffaa44;
+            border: 2px solid #ffaa44;
+        }
+        
+        .btn-secondary:hover {
+            background: rgba(255, 170, 68, 0.1);
+            transform: scale(1.05);
+        }
+        
+        .footer {
+            text-align: center;
+            padding: 40px;
+            color: #666;
+            border-top: 1px solid rgba(255, 170, 68, 0.1);
+            margin-top: 40px;
+        }
+        
+        .footer a {
+            color: #ffaa44;
+            text-decoration: none;
+        }
+        
+        .glow {
+            position: fixed;
+            width: 600px;
+            height: 600px;
+            background: radial-gradient(circle, rgba(255, 170, 68, 0.08) 0%, transparent 70%);
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            pointer-events: none;
+            z-index: 0;
+        }
+        
+        @media (max-width: 600px) {
+            .header h1 { font-size: 2em; }
+            .section { padding: 20px; }
+            .features { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <div class="glow"></div>
+    <div class="stars" id="stars"></div>
+    
+    <div class="container">
+        <div class="header">
+            <h1>🌌 پروژه کهکشان راه شیری</h1>
+            <p class="subtitle">شبیه‌ساز تعاملی سه‌بعدی کهکشان و منظومه شمسی</p>
+            <div class="badges">
+                <span class="badge js">JavaScript</span>
+                <span class="badge three">Three.js</span>
+                <span class="badge html">HTML5</span>
+            </div>
+        </div>
+        
+        <div class="section">
+            <h2>🚀 ویژگی‌های کلیدی</h2>
+            <div class="features">
+                <div class="feature-card">
+                    <div class="icon">🌌</div>
+                    <h3>کهکشان راه شیری</h3>
+                    <p>۸۸ جرم فضایی شامل سیارات، ستارگان، سحابی‌ها، سیاه‌چاله‌ها و کرم‌چاله‌ها</p>
+                </div>
+                <div class="feature-card">
+                    <div class="icon">☀️</div>
+                    <h3>منظومه شمسی</h3>
+                    <p>نمایش تعاملی ۸ سیاره با حرکت مداری واقعی و جزئیات کامل</p>
+                </div>
+                <div class="feature-card">
+                    <div class="icon">🎮</div>
+                    <h3>تعامل کامل</h3>
+                    <p>زوم، چرخش，جستجو，اسکرین‌شات و حالت تمام صفحه</p>
+                </div>
+                <div class="feature-card">
+                    <div class="icon">📱</div>
+                    <h3>ریسپانسیو</h3>
+                    <p>سازگار با موبایل، تبلت و دسکتاپ</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="section">
+            <h2>📊 آمار اجرام فضایی</h2>
+            <div class="stats-grid">
+                <div class="stat-item">
+                    <span class="number">۳۰</span>
+                    <div class="label">🪐 سیاره</div>
+                </div>
+                <div class="stat-item">
+                    <span class="number">۳۰</span>
+                    <div class="label">⭐ ستاره</div>
+                </div>
+                <div class="stat-item">
+                    <span class="number">۸</span>
+                    <div class="label">🌫 سحابی</div>
+                </div>
+                <div class="stat-item">
+                    <span class="number">۵</span>
+                    <div class="label">⚫ سیاه‌چاله</div>
+                </div>
+                <div class="stat-item">
+                    <span class="number">۳</span>
+                    <div class="label">⬜ سفیدچاله</div>
+                </div>
+                <div class="stat-item">
+                    <span class="number">۴</span>
+                    <div class="label">🌀 کرم‌چاله</div>
+                </div>
+                <div class="stat-item">
+                    <span class="number">۸</span>
+                    <div class="label">💎 سیارک</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="section">
+            <h2>📁 ساختار پروژه</h2>
+            <div class="file-tree">
+                <div><span class="folder">📦 galaxy project/</span></div>
+                <div>&nbsp;&nbsp;├── <span class="file">📄 galaxy.html</span> <span class="info">(۷۶۸ خط) - شبیه‌ساز کهکشان</span></div>
+                <div>&nbsp;&nbsp;└── <span class="file">📄 solar-system.html</span> <span class="info">(۲۷۸ خط) - شبیه‌ساز منظومه شمسی</span></div>
+            </div>
+        </div>
+        
+        <div class="section">
+            <h2>🎮 کنترل‌ها</h2>
+            <table class="controls-table">
+                <tr><th>کنترل</th><th>عملکرد</th></tr>
+                <tr><td>🖱 حرکت موس</td><td>چرخش دوربین</td></tr>
+                <tr><td>🔍 دکمه‌های +/-</td><td>زوم ورودی / خروجی</td></tr>
+                <tr><td>⚡ توربو</td><td>افزایش سرعت چرخش کهکشان</td></tr>
+                <tr><td>⏪ عقب‌گرد</td><td>معکوس کردن جهت چرخش</td></tr>
+                <tr><td>📸 عکس</td><td>ذخیره اسکرین‌شات</td></tr>
+                <tr><td>🌙 تم</td><td>تغییر بین حالت دارک و روشن</td></tr>
+                <tr><td>🔍 جستجو</td><td>یافتن اجرام فضایی</td></tr>
+            </table>
+        </div>
+        
+        <div class="section">
+            <h2>🚀 نحوه اجرا</h2>
+            <p style="color: #aaa; line-height: 1.8; margin-bottom: 20px;">
+                فایل‌ها را در مرورگر خود باز کنید. برای بهترین تجربه، از یک سرور محلی استفاده کنید:
+            </p>
+            <div class="file-tree">
+                <div><span class="folder">$</span> python -m http.server 8080</div>
+                <div><span class="info"># затем باز کردن http://localhost:8080/galaxy.html</span></div>
+            </div>
+        </div>
+        
+        <div class="btn-group">
+            <a href="galaxy.html" class="btn btn-primary">🌌 مشاهده کهکشان</a>
+            <a href="solar-system.html" class="btn btn-secondary">☀️ منظومه شمسی</a>
+        </div>
+        
+        <div class="footer">
+            <p>ساخته شده با ❤️ توسط <strong>_parsa_</strong></p>
+            <p style="margin-top: 10px;">۲۰۲۶ | لایسنس MIT</p>
+        </div>
+    </div>
+    
+    <script>
+        const starsContainer = document.getElementById('stars');
+        for (let i = 0; i < 100; i++) {
+            const star = document.createElement('div');
+            star.className = 'star';
+            const size = Math.random() * 3 + 1;
+            star.style.width = size + 'px';
+            star.style.height = size + 'px';
+            star.style.left = Math.random() * 100 + '%';
+            star.style.top = Math.random() * 100 + '%';
+            star.style.setProperty('--duration', (Math.random() * 3 + 2) + 's');
+            star.style.animationDelay = Math.random() * 5 + 's';
+            starsContainer.appendChild(star);
+        }
+    </script>
+</body>
+</html>
